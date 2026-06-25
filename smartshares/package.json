@@ -8,7 +8,7 @@
     "react-bootstrap": "^0.31.3",
     "react-dom": "^16.0.0",
     "react-router-dom": "^4.2.2",
-    "react-scripts": "^1.0.14",
+    "react-scripts": "^5.0.1",
     "solc": "^0.4.17",
     "web3": "^1.0.0-beta.23"
   },
@@ -23,11 +23,11 @@
   },
   "devDependencies": {
     "bootstrap": "^3.3.7",
-    "grunt": "^1.0.1",
+    "grunt": "^1.6.2",
     "grunt-contrib-less": "^1.4.1",
-    "grunt-contrib-watch": "^1.0.0",
+    "grunt-contrib-watch": "^1.1.0",
     "less-plugin-autoprefix": "^1.5.1",
     "less-plugin-clean-css": "^1.5.1",
-    "truffle-contract": "^1.1.8"
+    "truffle-contract": "^4.0.31"
   }
 }
