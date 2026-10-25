@@ -1,4 +1,5 @@
-import firebase from 'firebase'
+import { initializeApp } from 'firebase/app'
+import { getDatabase } from 'firebase/database'
 
 // Initialize Firebase
 var config = {
@@ -9,5 +10,6 @@ var config = {
   storageBucket: "smartshares-ad83c.appspot.com",
   messagingSenderId: "168497874387"
 };
-var fire = firebase.initializeApp(config);
+var fire = initializeApp(config);
+export const db = getDatabase(fire);
 export default fire;

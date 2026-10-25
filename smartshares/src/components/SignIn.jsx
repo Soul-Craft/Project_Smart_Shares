@@ -1,15 +1,5 @@
 import React from 'react';
-import {Button, FormGroup, Checkbox, ControlLabel, FormControl, HelpBlock} from 'react-bootstrap';
-
-function FieldGroup({ id, label, help, ...props }) {
-  return (
-    <FormGroup controlId={id}>
-      <ControlLabel>{label}</ControlLabel>
-      <FormControl {...props} />
-      {help && <HelpBlock>{help}</HelpBlock>}
-    </FormGroup>
-  );
-}
+import FieldGroup from './FieldGroup';
 
 const SignIn = ({ onChange }) => (
   <div>
@@ -30,10 +20,13 @@ const SignIn = ({ onChange }) => (
           type="password"
           placeholder="Password"
         />
-        <Checkbox checked>
-          Keep me logged in
-        </Checkbox>
-        <Button type="submit" className="btn btn-default" bsStyle="primary">Submit</Button>
+        <div className="checkbox">
+          <label>
+            <input type="checkbox" checked readOnly />
+            Keep me logged in
+          </label>
+        </div>
+        <button type="submit" className="btn btn-default btn-primary">Submit</button>
       </form>
     </div>
     <div className="col-xs-3 col-md-4">

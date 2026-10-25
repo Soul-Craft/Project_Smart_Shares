@@ -1,0 +1,40 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: smartshares
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: lts/*
+          cache: npm
+          cache-dependency-path: smartshares/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  # Owner, 2026-10-25: every Dependabot update merges once all other jobs pass, majors too.
+  dependabot-merge:
+    needs: [build]
+    if: github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    permissions: {contents: write, pull-requests: write}
+    steps:
+      - run: gh pr merge --squash --delete-branch "$PR"
+        env: {GH_TOKEN: "${{ github.token }}", PR: "${{ github.event.pull_request.html_url }}"}

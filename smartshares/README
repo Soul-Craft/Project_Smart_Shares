@@ -2,10 +2,6 @@ npm install
 
 npm install -g truffle
 
-npm install truffle-contracts
-
-you might need other things here react-router, ethereumjs, web3, sold, etc...
-
 npm start
 
 Once, everything is running: In another terminal run

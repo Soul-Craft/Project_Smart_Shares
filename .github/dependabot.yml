@@ -1,0 +1,20 @@
+# Always the newest: each ecosystem is checked daily. Minor and patch bumps arrive in one pull request, majors one
+# by one; CI's dependabot-merge job merges each once the build passes.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /smartshares
+    schedule:
+      interval: daily
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  # Actions are pinned to full commit SHAs (the version is the comment beside each); all bumps in one pull request.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: daily
+    groups:
+      actions:
+        patterns: ["*"]

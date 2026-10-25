@@ -1,15 +1,5 @@
 import React from 'react';
-import {Button, Form, FormGroup, Checkbox, ControlLabel, FormControl, HelpBlock} from 'react-bootstrap';
-
-function FieldGroup({ id, label, help, ...props }) {
-  return (
-    <FormGroup controlId={id}>
-      <ControlLabel>{label}</ControlLabel>
-      <FormControl {...props} />
-      {help && <HelpBlock>{help}</HelpBlock>}
-    </FormGroup>
-  );
-}
+import FieldGroup from './FieldGroup';
 
 const SignUp = ({ onChange }) => (
   <div className="container-full">
@@ -17,7 +7,7 @@ const SignUp = ({ onChange }) => (
     </div>
     <div className="col-xs-6 col-md-4">
       <h2>Create Account</h2>
-      <Form>
+      <form>
         <FieldGroup
           id="signUpEmailAddress"
           type="email"
@@ -36,13 +26,16 @@ const SignUp = ({ onChange }) => (
           type="password"
           placeholder="Confirm Password"
         />
-        <Checkbox checked readOnly>
-          I agree to the terms
-        </Checkbox>
-        <Button type="submit" bsStyle="primary">
+        <div className="checkbox">
+          <label>
+            <input type="checkbox" checked readOnly />
+            I agree to the terms
+          </label>
+        </div>
+        <button type="submit" className="btn btn-primary">
           Submit
-        </Button>
-      </Form>
+        </button>
+      </form>
     </div>
     <div className="col-xs-3 col-md-4">
     </div>
