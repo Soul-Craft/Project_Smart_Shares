@@ -1,7 +1,9 @@
 import React from 'react';
-import firebase from '../fire';
+import { ref, onValue, push, remove } from 'firebase/database';
+import { Contract, Wallet } from 'ethers';
+import { db } from '../fire';
 import ShareContract from '../sol/Share.json'
-import getWeb3 from '../util/getWeb3'
+import getProvider from '../util/getProvider'
 
 class Shareholders extends React.Component {
   constructor(props) {
@@ -17,19 +19,20 @@ class Shareholders extends React.Component {
       sharePercentage: '',
       shareholders: [],
       totalShares: 0,
-      web3: null,
+      provider: null,
       address: ''
     }
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  refreshShareholders() {
-    const shareholdersRef = firebase.database().ref('shareholders');
-    let totalShares = 0;
-    shareholdersRef.on('value', (snapshot) => {
+  // One listener for the component's lifetime: Firebase calls it again after every push and remove.
+  listenToShareholders() {
+    const shareholdersRef = ref(db, 'shareholders');
+    return onValue(shareholdersRef, (snapshot) => {
       let shareholders = snapshot.val();
       let newState = [];
+      let totalShares = 0;
 
       for (let shareholder in shareholders) {
         let sharholderShares = Number.parseInt(shareholders[shareholder].sharecount, 10);
@@ -53,7 +56,7 @@ class Shareholders extends React.Component {
           sharePercentage: ((sharholderShares / totalShares) * 100).toFixed(2)
         });
       }
-      var shareholdersSorted = newState.sort((a, b) => Number(b.sharecount) - Number(a.sharecount));
+      newState.sort((a, b) => Number(b.sharecount) - Number(a.sharecount));
       this.setState({
         shareholders: newState
       });
@@ -61,41 +64,38 @@ class Shareholders extends React.Component {
   }
 
   componentDidMount() {
-    this.refreshShareholders();
+    this.stopListening = this.listenToShareholders();
 
-    getWeb3
-    .then(results => {
+    getProvider
+    .then(provider => {
       this.setState({
-        web3: results.web3
+        provider: provider
       })
     })
     .catch(() => {
-      console.log('Error finding web3.')
+      console.log('Error finding an Ethereum provider.')
     })
   }
 
-  addNewSharesContract(toAccount, amount) {
-    const contract = require('truffle-contract');
-    const shareContract = contract(ShareContract);
-    shareContract.setProvider(this.state.web3.currentProvider);
-    shareContract.defaults({
-      gas: 447678,
-      gasPrice: 100000000000
-    });;
-    // this.state.web3.eth.getBalance(my_test_address).then(console.log);
-    var shareContractInstance;
+  componentWillUnmount() {
+    this.stopListening();
+  }
 
-    // Get accounts and then get the share contract and create shares for the newly created account
-    this.state.web3.eth.getAccounts((error, accounts) => {
-      shareContract.deployed().then((instance) => {
-        shareContractInstance = instance;
-        return shareContractInstance.create(toAccount, amount, { from: accounts[0].toLowerCase() });
-      }).then((result) => {
-        return shareContractInstance.getBalance(toAccount);
-      }).then((result) => {
-        alert("Address " + toAccount + " received " + result.c[0] + " new shares");
-      });
+  async addNewSharesContract(toAccount, amount) {
+    const provider = this.state.provider;
+    // truffle migrate records the deployment under the node's network id (net_version), not its chain id.
+    const networkId = await provider.send('net_version', []);
+    const signer = await provider.getSigner();
+    const shareContractInstance = new Contract(ShareContract.networks[networkId].address, ShareContract.abi, signer);
+
+    // Create shares for the newly created account, from the first account the node or wallet holds.
+    const tx = await shareContractInstance.create(toAccount, amount, {
+      gasLimit: 447678,
+      gasPrice: 100000000000
     });
+    await tx.wait();
+    const result = await shareContractInstance.getBalance(toAccount);
+    alert("Address " + toAccount + " received " + result + " new shares");
   }
 
   handleChange(e) {
@@ -106,10 +106,10 @@ class Shareholders extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    var account = this.state.web3.eth.accounts.create();
+    var account = Wallet.createRandom();
     this.addNewSharesContract(account.address, this.state.sharecount);
 
-    const shareholdersRef = firebase.database().ref('shareholders');
+    const shareholdersRef = ref(db, 'shareholders');
     const shareholder = {
       firstname: this.state.firstname,
       lastname: this.state.lastname,
@@ -120,7 +120,7 @@ class Shareholders extends React.Component {
       board: this.state.board,
       account: account.address
     }
-    shareholdersRef.push(shareholder);
+    push(shareholdersRef, shareholder);
     this.setState({
       firstname: '',
       lastname: '',
@@ -131,13 +131,11 @@ class Shareholders extends React.Component {
       board: false,
       account: ''
     });
-    this.refreshShareholders();
   }
 
   removeItem(shareholderId) {
-    const shareholderRef = firebase.database().ref(`/shareholders/${shareholderId}`);
-    shareholderRef.remove();
-    this.refreshShareholders();
+    const shareholderRef = ref(db, `/shareholders/${shareholderId}`);
+    remove(shareholderRef);
   }
 
   render () {

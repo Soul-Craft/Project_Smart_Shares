@@ -1,13 +1,11 @@
-import React, { Component } from 'react';
-import {BrowserRouter as Router, Route, Link} from 'react-router-dom';
-import {Nav, NavItem} from 'react-bootstrap';
+import React from 'react';
+import {BrowserRouter as Router, Routes, Route, Link} from 'react-router';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Home from './components/Home';
 import Shareholders from './components/Shareholders';
 import './App.css';
 import './css/bootstrap.css';
-import fire from './fire';
 
 class App extends React.Component {
   render() {
@@ -28,11 +26,13 @@ class App extends React.Component {
           </div>
 
           <hr/>
-          
-          <Route exact path="/" component={Home}/>
-          <Route path="/signup" component={SignUp}/>
-          <Route path="/signin" component={SignIn}/>
-          <Route path="/shareholders" component={Shareholders}/>
+
+          <Routes>
+            <Route path="/" element={<Home/>}/>
+            <Route path="/signup/*" element={<SignUp/>}/>
+            <Route path="/signin/*" element={<SignIn/>}/>
+            <Route path="/shareholders/*" element={<Shareholders/>}/>
+          </Routes>
         </div>
       </Router>
     );
